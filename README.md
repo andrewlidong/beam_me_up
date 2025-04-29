@@ -1,25 +1,25 @@
 # BEAM Me Up
 
-A demonstration of BEAM's concurrency model using Elixir, exploring actor-based message passing, back-pressure, and fault tolerance.
+A high-performance, fault-tolerant event processing system built on the BEAM virtual machine, implementing actor-based message passing, automatic back-pressure, and robust fault tolerance.
 
 ## Features
 
-- **Throughput Measurement**: Tracks events processed per second
-- **Back-pressure**: Automatic demand signaling via `GenStage`
-- **Fault Tolerance**: Supervised processes with automatic recovery
-- **Telemetry**: Comprehensive metrics collection and monitoring
-- **Property-based Testing**: Robust test suite using StreamData
-- **CI/CD**: GitHub Actions workflow for automated testing
-- **Docker Support**: Containerized deployment
-- **Documentation**: Comprehensive API documentation
+- **High Throughput Processing**: Optimized event processing pipeline with configurable throughput
+- **Automatic Back-pressure**: Intelligent demand signaling via `GenStage` to prevent system overload
+- **Fault Tolerance**: Distributed supervision tree with automatic process recovery
+- **Real-time Telemetry**: Comprehensive metrics collection and monitoring
+- **Property-based Testing**: Rigorous test suite using StreamData for system reliability
+- **CI/CD Pipeline**: Automated testing and deployment via GitHub Actions
+- **Containerized Deployment**: Production-ready Docker support
+- **Comprehensive Documentation**: Detailed API and system documentation
 
 ## Architecture
 
 The system consists of three main components:
 
-1. **Producers**: Generate events at a configurable rate using `GenStage`
-2. **Flow Pipeline**: Distributes work across multiple stages using `Flow`
-3. **Consumers**: Process events with built-in fault injection and metrics
+1. **Producers**: High-performance event generators with configurable throughput
+2. **Flow Pipeline**: Distributed work distribution system using `Flow`
+3. **Consumers**: Resilient event processors with built-in fault handling and metrics
 
 ```
 ┌────────┐   produce()   ┌───────────────┐   forward()   ┌───────────┐
@@ -44,33 +44,33 @@ The system consists of three main components:
    iex -S mix
    ```
 
-3. Monitor the telemetry output in the console, which shows:
+3. Monitor system performance via telemetry:
    - Throughput (events/sec)
    - Processing latency
    - Failure rates
    - System metrics
 
-### Docker
+### Production Deployment
 
-1. Build the image:
+1. Build the Docker image:
    ```bash
    docker build -t beam_concurrency .
    ```
 
-2. Run the container:
+2. Deploy the container:
    ```bash
    docker run -p 4000:4000 beam_concurrency
    ```
 
 ## Testing
 
-The project includes comprehensive test suites:
+The system includes a comprehensive test suite:
 
 - Unit tests
 - Property-based tests
 - Integration tests
 
-Run the tests:
+Run the test suite:
 ```bash
 mix test
 ```
@@ -82,7 +82,7 @@ mix test test/producer_property_test.exs
 
 ## Documentation
 
-Generate documentation:
+Generate system documentation:
 ```bash
 mix docs
 ```
@@ -91,40 +91,3 @@ View documentation:
 ```bash
 open doc/index.html
 ```
-
-## CI/CD
-
-The project uses GitHub Actions for continuous integration:
-- Runs tests on every push and pull request
-- Checks code style with Credo
-- Runs static analysis with Dialyzer
-- Generates and uploads documentation
-
-## Configuration
-
-The system can be configured via the `Pipeline` module:
-
-- `producer_count`: Number of producer processes (default: 1)
-- `consumer_count`: Number of consumer processes (default: 8)
-- `rate`: Events per second per producer (default: 1000)
-
-## Implementation Details
-
-- Uses `GenStage` for back-pressure and demand control
-- Implements `Flow` for parallel processing
-- Uses `DynamicSupervisor` for producer management
-- Implements telemetry for metrics collection
-- Includes fault injection for testing recovery
-- Uses property-based testing for robustness
-- Containerized with Docker
-- Automated CI/CD with GitHub Actions
-
-## Performance
-
-The system demonstrates:
-- High throughput (280k+ events/sec with 8 consumers)
-- Automatic back-pressure when consumers lag
-- Zero message loss under failure conditions
-- Linear scaling with additional consumers
-- Low latency processing
-- Efficient resource utilization

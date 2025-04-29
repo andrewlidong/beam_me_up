@@ -7,6 +7,9 @@ defmodule BeamConcurrency.Application do
 
   @impl true
   def start(_type, _args) do
+    # Attach telemetry handlers
+    BeamConcurrency.Telemetry.attach_handlers()
+
     children = [
       # Start the DynamicSupervisor for producers
       {DynamicSupervisor, name: BeamConcurrency.ProducerSupervisor, strategy: :one_for_one},

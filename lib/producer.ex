@@ -35,7 +35,8 @@ defmodule BeamConcurrency.Producer do
     state = %{
       rate: rate,
       interval: 1000 / rate,
-      last_sent: System.monotonic_time(:millisecond)
+      last_sent: System.monotonic_time(:millisecond),
+      producer_id: Keyword.get(opts, :name, self())
     }
 
     {:producer, state}
@@ -47,6 +48,14 @@ defmodule BeamConcurrency.Producer do
   """
   def handle_demand(demand, state) when demand > 0 do
     events = generate_events(demand, state)
+
+    # Emit telemetry event
+    :telemetry.execute(
+      [:beam_concurrency, :producer, :events_generated],
+      %{count: length(events), rate: state.rate},
+      %{producer_id: state.producer_id}
+    )
+
     {:noreply, events, state}
   end
 

@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '25.3'
+          elixir-version: '1.14.5'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+      - name: Install Dependencies
+        run: mix deps.get
+      - name: Run Tests
+        run: mix test
+      - name: Run Credo
+        run: mix credo
+      - name: Run Dialyzer
+        run: mix dialyzer
+      - name: Generate Documentation
+        run: mix docs
+      - name: Upload Documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs
+          path: doc/

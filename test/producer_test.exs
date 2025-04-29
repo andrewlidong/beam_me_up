@@ -10,7 +10,7 @@ defmodule BeamConcurrency.ProducerTest do
   test "generates events at configured rate", %{producer: producer} do
     # Ask for 10 events
     events = GenStage.call(producer, {:ask, 10})
-    assert length(events) <= 10
+    assert not Enum.empty?(events) and length(events) <= 10
 
     # Verify event structure
     event = hd(events)
@@ -23,10 +23,10 @@ defmodule BeamConcurrency.ProducerTest do
   test "respects rate limiting", %{producer: producer} do
     # First batch
     events1 = GenStage.call(producer, {:ask, 100})
-    assert length(events1) > 0
+    assert not Enum.empty?(events1)
 
     # Immediate second batch should be limited
     events2 = GenStage.call(producer, {:ask, 100})
-    assert length(events2) == 0
+    assert events2 == []
   end
 end

@@ -31,17 +31,17 @@ defmodule BeamConcurrency.ProducerPropertyTest do
 
       # First demand should get events
       events1 = GenStage.call(producer, {:ask, Enum.at(demands, 0)})
-      assert length(events1) > 0
+      assert not Enum.empty?(events1)
 
       # Immediate second demand should be limited
       events2 = GenStage.call(producer, {:ask, Enum.at(demands, 1)})
-      assert length(events2) == 0
+      assert events2 == []
 
       # Wait for slightly more than one interval
       interval = ceil(1000 / rate)
       Process.sleep(interval + 10)
       events3 = GenStage.call(producer, {:ask, Enum.at(demands, 2)})
-      assert length(events3) > 0
+      assert not Enum.empty?(events3)
     end
   end
 end

@@ -1,4 +1,17 @@
 defmodule BeamConcurrency.Benchmark do
+  @moduledoc """
+  A GenServer that collects and reports performance metrics for the system.
+
+  This module periodically measures and logs system performance metrics including:
+  - Event processing throughput
+  - Total events processed
+  - Failure rates
+  - Processing time statistics
+
+  Measurements are taken every 5 seconds and logged to provide real-time insight
+  into system performance.
+  """
+
   use GenServer
   require Logger
 

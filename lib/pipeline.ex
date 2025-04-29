@@ -1,4 +1,14 @@
 defmodule BeamConcurrency.Pipeline do
+  @moduledoc """
+  A GenStage pipeline that coordinates producers and consumers in the system.
+
+  This module sets up and manages a dynamic pipeline of producers and consumers,
+  using Flow for efficient event processing. It handles:
+  - Dynamic creation of producers with configurable rates
+  - Dynamic creation of consumers with automatic load balancing
+  - Event flow coordination between producers and consumers
+  """
+
   use GenStage
   require Logger
 

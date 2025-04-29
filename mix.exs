@@ -14,6 +14,11 @@ defmodule BeamConcurrency.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
+      ],
+      docs: [
+        main: "readme",
+        extras: ["README.md"],
+        source_url: "https://github.com/andrewlidong/beam_me_up"
       ]
     ]
   end
@@ -36,7 +41,8 @@ defmodule BeamConcurrency.MixProject do
       {:stream_data, "~> 0.5", only: :test},
       {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false}
     ]
   end
 end

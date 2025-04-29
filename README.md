@@ -1,4 +1,4 @@
-# BEAM Concurrency Patterns
+# BEAM Me Up
 
 A demonstration of BEAM's concurrency model using Elixir, exploring actor-based message passing, back-pressure, and fault tolerance.
 

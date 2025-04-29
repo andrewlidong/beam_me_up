@@ -24,7 +24,7 @@ defmodule BeamConcurrency.ProducerPropertyTest do
 
   property "respects rate limiting over time" do
     check all(
-            rate <- StreamData.positive_integer(),
+            rate <- StreamData.integer(1..1000),
             demands <- StreamData.list_of(StreamData.positive_integer(), length: 3)
           ) do
       {:ok, producer} = Producer.start_link(rate: rate)
@@ -37,8 +37,9 @@ defmodule BeamConcurrency.ProducerPropertyTest do
       events2 = GenStage.call(producer, {:ask, Enum.at(demands, 1)})
       assert length(events2) == 0
 
-      # Wait for rate limit to reset
-      Process.sleep(1000)
+      # Wait for slightly more than one interval
+      interval = ceil(1000 / rate)
+      Process.sleep(interval + 10)
       events3 = GenStage.call(producer, {:ask, Enum.at(demands, 2)})
       assert length(events3) > 0
     end

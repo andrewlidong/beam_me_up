@@ -3,13 +3,15 @@ defmodule BeamConcurrency.Telemetry do
   Telemetry integration for monitoring the system's performance and behavior.
   """
 
+  require Logger
+
   def attach_handlers do
     :telemetry.attach_many(
       "beam-concurrency-handler",
       [
         [:beam_concurrency, :producer, :events_generated],
         [:beam_concurrency, :consumer, :events_processed],
-        [:beam_concurrency, :consumer, :events_failed],
+        [:beam_concurrency, :consumer, :processing_failed],
         [:beam_concurrency, :pipeline, :latency]
       ],
       &handle_event/4,
@@ -40,22 +42,22 @@ defmodule BeamConcurrency.Telemetry do
     Logger.info("""
     Consumer Telemetry:
     - Events Processed: #{measurements.count}
-    - Processing Time: #{measurements.processing_time}ms
+    - Failure Rate: #{measurements.failure_rate}
     - Consumer: #{inspect(metadata.consumer_id)}
     """)
   end
 
   def handle_event(
-        [:beam_concurrency, :consumer, :events_failed],
+        [:beam_concurrency, :consumer, :processing_failed],
         measurements,
         metadata,
         _config
       ) do
     Logger.warning("""
     Consumer Failure:
-    - Failed Events: #{measurements.count}
-    - Error: #{inspect(metadata.error)}
+    - Error: #{measurements.error}
     - Consumer: #{inspect(metadata.consumer_id)}
+    - Event ID: #{metadata.event_id}
     """)
   end
 

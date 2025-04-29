@@ -35,7 +35,7 @@ defmodule BeamConcurrency.Producer do
     state = %{
       rate: rate,
       interval: 1000 / rate,
-      last_sent: System.monotonic_time(:millisecond),
+      last_sent: nil,
       producer_id: Keyword.get(opts, :name, self())
     }
 
@@ -47,7 +47,21 @@ defmodule BeamConcurrency.Producer do
   while respecting the configured rate limit.
   """
   def handle_demand(demand, state) when demand > 0 do
-    events = generate_events(demand, state)
+    now = System.monotonic_time(:millisecond)
+    events_to_send = calculate_events_to_send(demand, state, now)
+
+    events =
+      if events_to_send > 0 do
+        for _ <- 1..events_to_send do
+          %{
+            id: System.unique_integer([:positive]),
+            timestamp: now,
+            payload: :crypto.strong_rand_bytes(32)
+          }
+        end
+      else
+        []
+      end
 
     # Emit telemetry event
     :telemetry.execute(
@@ -56,17 +70,20 @@ defmodule BeamConcurrency.Producer do
       %{producer_id: state.producer_id}
     )
 
-    {:noreply, events, state}
+    # Update last_sent time only if we sent events
+    new_state = if length(events) > 0, do: %{state | last_sent: now}, else: state
+    {:noreply, events, new_state}
   end
 
-  @doc false
-  defp generate_events(demand, state) do
+  @doc """
+  Handles synchronous calls to the producer.
+  """
+  def handle_call({:ask, demand}, _from, state) do
     now = System.monotonic_time(:millisecond)
-    time_since_last = now - state.last_sent
-    events_to_send = min(demand, floor(time_since_last / state.interval))
+    events_to_send = calculate_events_to_send(demand, state, now)
 
-    if events_to_send > 0 do
-      events =
+    events =
+      if events_to_send > 0 do
         for _ <- 1..events_to_send do
           %{
             id: System.unique_integer([:positive]),
@@ -74,10 +91,32 @@ defmodule BeamConcurrency.Producer do
             payload: :crypto.strong_rand_bytes(32)
           }
         end
+      else
+        []
+      end
 
-      events
-    else
-      []
+    # Update last_sent time only if we sent events
+    new_state = if length(events) > 0, do: %{state | last_sent: now}, else: state
+    {:reply, events, [], new_state}
+  end
+
+  defp calculate_events_to_send(demand, state, now) do
+    case state.last_sent do
+      nil ->
+        # First request, allow only one event
+        1
+
+      last_sent ->
+        time_since_last = now - last_sent
+        # Convert to seconds and calculate allowed events
+        allowed_events = floor(time_since_last * state.rate / 1000)
+
+        # If less than one interval has passed, return 0
+        if time_since_last < state.interval do
+          0
+        else
+          min(demand, max(0, allowed_events))
+        end
     end
   end
 end
